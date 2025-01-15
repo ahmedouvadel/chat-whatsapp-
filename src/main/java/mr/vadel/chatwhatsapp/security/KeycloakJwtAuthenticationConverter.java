@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -26,6 +27,7 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
         var resourceAccess = new HashMap<>(jwt.getClaim("resource_access"));
         var eternal = (Map<String, List<String>>)resourceAccess.get("account");
         var roles = eternal.get("roles");
-        return null;
+        return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.replace("-","_") ))
+                .collect(Collectors.toList());
     }
 }
