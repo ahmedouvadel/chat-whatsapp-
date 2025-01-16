@@ -42,12 +42,10 @@ public class MessageController {
         message.setMessageToSeen(chatId, authentication);
     }
 
-    @GetMapping("/chat/{chat-id}")
+    @GetMapping(value = ApiConstant.GET_MESSAGES)
     public ResponseEntity<List<MessageResponse>> getMessages(
             @RequestParam(name = "chat-id") String chatId) {
         return ResponseEntity.ok(message.findChatMessages(chatId));
     }
-
-
 
 }

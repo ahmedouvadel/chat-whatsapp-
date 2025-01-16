@@ -2,6 +2,7 @@ package mr.vadel.chatwhatsapp.mappers;
 
 import mr.vadel.chatwhatsapp.dto.MessageResponse;
 import mr.vadel.chatwhatsapp.entity.Message;
+import mr.vadel.chatwhatsapp.utils.FileUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +15,7 @@ public class MessageMapper {
                 .receiverId(message.getReceiveId())
                 .state(message.getState())
                 .createAt(message.getCreatedDate())
-                // read media from message
+                .media(FileUtils.readFileFromLocation(message.getMediaFilePath()))
                 .build();
     }
 }
