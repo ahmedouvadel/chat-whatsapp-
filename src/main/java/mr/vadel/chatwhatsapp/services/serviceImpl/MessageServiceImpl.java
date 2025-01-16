@@ -4,14 +4,17 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import mr.vadel.chatwhatsapp.dto.MessageRequest;
 import mr.vadel.chatwhatsapp.dto.MessageResponse;
+import mr.vadel.chatwhatsapp.dto.Notification;
 import mr.vadel.chatwhatsapp.entity.Chat;
 import mr.vadel.chatwhatsapp.entity.Message;
 import mr.vadel.chatwhatsapp.enumm.MessageState;
 import mr.vadel.chatwhatsapp.enumm.MessageType;
+import mr.vadel.chatwhatsapp.enumm.NotificationType;
 import mr.vadel.chatwhatsapp.mappers.MessageMapper;
 import mr.vadel.chatwhatsapp.repository.ChatRepository;
 import mr.vadel.chatwhatsapp.repository.MessageRepository;
 import mr.vadel.chatwhatsapp.services.service.IMessage;
+import mr.vadel.chatwhatsapp.utils.FileUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +28,9 @@ public class MessageServiceImpl implements IMessage {
 
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
-    private MessageMapper messageMapper;
+    private final MessageMapper messageMapper;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
     @Override
     public void saveMessage(MessageRequest messageRequest) {
@@ -37,9 +41,21 @@ public class MessageServiceImpl implements IMessage {
         message.setContent(messageRequest.getContent());
         message.setChat(chat);
         message.setSenderId(messageRequest.getSenderId());
-        message.setReceiveId(messageRequest.getReceiverId());
+        message.setReceiverId(messageRequest.getReceiverId());
         message.setState(MessageState.SENT);
         messageRepository.save(message);
+
+        Notification notification = Notification.builder()
+                .senderId(messageRequest.getSenderId())
+                .messageType(messageRequest.getType())
+                .content(messageRequest.getContent())
+                .receiverId(messageRequest.getReceiverId())
+                .chatId(chat.getId())
+                .notificationType(NotificationType.MESSAGE)
+                .chatName(chat.getChatName(message.getSenderId()))
+                .build();
+
+        notificationService.sendNotification(message.getReceiverId(), notification);
 
     }
 
@@ -56,8 +72,17 @@ public class MessageServiceImpl implements IMessage {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new EntityNotFoundException("Chat not found"));
 
-        //final String recipientId = getRecipientId(chat, authentication); // This line for Notfication part
+        final String recipientId = getRecipientId(chat, authentication);
         messageRepository.setMessagesToSeenByChatId(chatId, MessageState.SEEN);
+
+        Notification notification = Notification.builder()
+                .chatId(chat.getId())
+                .senderId(getSenderId(chat, authentication))
+                .receiverId(recipientId)
+                .notificationType(NotificationType.SEEN)
+                .build();
+        notificationService.sendNotification(recipientId, notification);
+
     }
 
     @Override
@@ -72,11 +97,22 @@ public class MessageServiceImpl implements IMessage {
         Message message = new Message();
         message.setChat(chat);
         message.setSenderId(senderId);
-        message.setReceiveId(recipientId);
+        message.setReceiverId(recipientId);
         message.setType(MessageType.IMAGE);
         message.setState(MessageState.SENT);
         message.setMediaFilePath(filePath);
         messageRepository.save(message);
+
+        Notification notification = Notification.builder()
+                .senderId(senderId)
+                .receiverId(recipientId)
+                .chatId(chat.getId())
+                .notificationType(NotificationType.IMAGE)
+                .messageType(MessageType.IMAGE)
+                .media(FileUtils.readFileFromLocation(filePath))
+                .build();
+        notificationService.sendNotification(recipientId, notification);
+
     }
 
     private String getSenderId(Chat chat, Authentication authentication) {

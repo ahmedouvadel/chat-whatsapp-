@@ -37,7 +37,7 @@ public class Message extends BaseAuditingEntity {
     @Column(name = "sender_id" ,nullable = false)
     private String senderId;
     @Column(name = "receive_id" ,nullable = false)
-    private String receiveId;
+    private String receiverId;
     private String mediaFilePath;
 
 }

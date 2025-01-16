@@ -12,7 +12,7 @@ public class MessageMapper {
                 .id(message.getId())
                 .content(message.getContent())
                 .senderId(message.getSenderId())
-                .receiverId(message.getReceiveId())
+                .receiverId(message.getReceiverId())
                 .state(message.getState())
                 .createAt(message.getCreatedDate())
                 .media(FileUtils.readFileFromLocation(message.getMediaFilePath()))
