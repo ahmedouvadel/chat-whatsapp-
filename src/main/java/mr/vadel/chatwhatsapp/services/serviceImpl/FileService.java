@@ -1,13 +1,14 @@
 package mr.vadel.chatwhatsapp.services.serviceImpl;
 
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,15 +22,15 @@ import static java.lang.System.currentTimeMillis;
 public class FileService {
 
     @Value("${application.file.uploads.media-output-path}")
-    private final String uploadFilePath;
-    public String saveFile(@NonNull MultipartFile sourceFile,
-                           @NonNull String userId) {
+    private String uploadFilePath;
+    public String saveFile(@Nonnull MultipartFile sourceFile,
+                           @Nonnull  String userId) {
         final String fileUploadSubPath = "users" + separator + userId;
         return uploadFile(sourceFile, fileUploadSubPath);
     }
 
-    private String uploadFile(@NonNull MultipartFile sourceFile,
-                              @NonNull String fileUploadSubPath) {
+    private String uploadFile(@Nonnull MultipartFile sourceFile,
+                              @Nonnull String fileUploadSubPath) {
         final String finalUploadPath = uploadFilePath + separator + fileUploadSubPath;
         final File targetFolder = new File(finalUploadPath);
         if (!targetFolder.exists()) {
@@ -45,7 +46,7 @@ public class FileService {
         try {
             Files.write(targetPath, sourceFile.getBytes());
             return targetFilePath;
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("Failed to save file: {}", targetFilePath, e);
         }
         return null;
