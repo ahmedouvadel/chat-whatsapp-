@@ -1,5 +1,6 @@
 package mr.vadel.chatwhatsapp.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import mr.vadel.chatwhatsapp.common.StringResponse;
 import mr.vadel.chatwhatsapp.constants.ApiConstant;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping( ApiConstant.CHAT_URL)
 @RequiredArgsConstructor
+@Tag(name = "Chat")
 public class ChatController {
 
     private final IChat chatService;

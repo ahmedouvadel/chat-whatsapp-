@@ -1,14 +1,14 @@
 package mr.vadel.chatwhatsapp.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import mr.vadel.chatwhatsapp.constants.ApiConstant;
 import mr.vadel.chatwhatsapp.dto.MessageRequest;
 import mr.vadel.chatwhatsapp.dto.MessageResponse;
-import mr.vadel.chatwhatsapp.services.service.IChat;
 import mr.vadel.chatwhatsapp.services.service.IMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ApiConstant.MESSAGE_URL)
 @RequiredArgsConstructor
+@Tag(name = "Message")
 public class MessageController {
 
     private final IMessage message;
@@ -31,6 +32,7 @@ public class MessageController {
     @PostMapping(value = ApiConstant.MESSAGE_URL_UPLOAD_MEDIA, consumes = ApiConstant.CONSUMES_FILE)
     @ResponseStatus(HttpStatus.CREATED)
     public void uploadMediaMessage(@RequestParam(name = "chat-id") String chatId,
+                                   @Parameter()
                                    @RequestParam(name = "file") MultipartFile file,
                                    Authentication authentication) {
         message.uploadMediaMessage(chatId, file, authentication);
